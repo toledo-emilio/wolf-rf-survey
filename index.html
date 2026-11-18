@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wolf RF Survey</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<header>
+    <h1>WOLF RF SURVEY</h1>
+    <p>Sistema de Evaluación y Cobertura Wi‑Fi</p>
+</header>
+
+<main>
+
+    <!-- DASHBOARD -->
+
+    <section class="dashboard">
+
+        <div class="card">
+            <h3>📊 Total Mediciones</h3>
+            <span id="totalMediciones">0</span>
+        </div>
+
+        <div class="card">
+            <h3>📶 RSSI Promedio</h3>
+            <span id="promedioRssi">0</span>
+        </div>
+
+        <div class="card">
+            <h3>⚠ Puntos Críticos</h3>
+            <span id="puntosCriticos">0</span>
+        </div>
+
+        <div class="card">
+            <h3>✅ Estado General</h3>
+            <span id="estadoGeneral">Sin datos</span>
+        </div>
+
+    </section>
+
+    <!-- FORMULARIO -->
+
+    <section class="contenedor">
+
+        <h2>Nueva Medición</h2>
+
+        <form id="medicionForm">
+
+            <input type="text" id="punto" placeholder="Punto" required>
+
+            <select id="zona">
+                <option>Oficina</option>
+                <option>Bodega</option>
+                <option>Recepción</option>
+                <option>Producción</option>
+                <option>Laboratorio</option>
+                <option>Otro</option>
+            </select>
+
+            <input type="text" id="responsable" placeholder="Responsable" required>
+
+            <input type="number"
+                id="rssi"
+                placeholder="RSSI"
+                min="-100"
+                max="-30"
+                required>
+
+            <input type="number"
+                id="snr"
+                placeholder="SNR"
+                min="0"
+                max="60">
+
+            <input type="number"
+                id="canal"
+                placeholder="Canal">
+
+            <select id="banda">
+                <option>2.4 GHz</option>
+                <option>5 GHz</option>
+                <option>6 GHz</option>
+            </select>
+
+            <input type="number"
+                id="latencia"
+                placeholder="Latencia (ms)">
+
+            <select id="dispositivo">
+                <option>Notebook</option>
+                <option>Samsung</option>
+                <option>Xiaomi</option>
+                <option>iPhone</option>
+                <option>Tablet</option>
+                <option>Otro</option>
+            </select>
+
+            <textarea
+                id="observaciones"
+                placeholder="Observaciones"></textarea>
+
+            <button type="submit">
+                Guardar Medición
+            </button>
+
+        </form>
+        <button id="btnLimpiar">
+    🗑 Borrar todas las mediciones
+</button>
+
+    </section>
+
+    <!-- DIAGNOSTICO -->
+
+    <section class="contenedor">
+
+        <h2>Diagnóstico</h2>
+
+        <div id="diagnostico">
+            Aún no existen mediciones registradas.
+        </div>
+
+    </section>
+
+    <!-- TABLA -->
+
+    <section class="contenedor">
+
+        <h2>Mediciones Registradas</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+    <th>Acciones</th>
+    <th>Fecha</th>
+    <th>Punto</th>
+    <th>Zona</th>
+    <th>Responsable</th>
+    <th>RSSI</th>
+    <th>Observaciones</th>
+    <th>Estado</th>
+</tr>
+            </thead>
+
+            <tbody id="tablaMediciones">
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <!-- GRAFICO -->
+
+    <section class="contenedor">
+
+        <h2>Gráfico RSSI</h2>
+
+        <canvas id="rssiChart"></canvas>
+
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>
