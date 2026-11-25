@@ -145,3 +145,169 @@ canvas{
     width:100% !important;
     max-height:400px;
 }
+
+
+/* =========================================================
+   ESTILOS ADICIONALES: MAPA DE CALOR Y PIZARRA VERTICAL RF
+   ========================================================= */
+.rf-studio-grid {
+    display: grid;
+    grid-template-columns: 1fr 520px;
+    gap: 25px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .rf-studio-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.rf-controles {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.rf-controles h3 {
+    font-size: 1rem;
+    color: #0f172a;
+    margin-bottom: 12px;
+}
+
+.herramientas-btn {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.btn-tool {
+    background: #e2e8f0;
+    color: #1e293b;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+}
+
+.btn-tool:hover {
+    background: #cbd5e1;
+}
+
+.btn-tool.activo {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn-danger:hover {
+    background: #fecaca;
+}
+
+.control-grupo {
+    margin-bottom: 12px;
+}
+
+.control-grupo label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #334155;
+}
+
+.slider-par {
+    display: grid;
+    grid-template-columns: 1fr 80px;
+    gap: 10px;
+    align-items: center;
+}
+
+.slider-par input[type="range"] {
+    padding: 0;
+    cursor: pointer;
+}
+
+.slider-par input[type="number"] {
+    padding: 6px 8px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.diagnostico-mini {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin: 15px 0;
+}
+
+.lista-equipos {
+    list-style: none;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.lista-equipos li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.82rem;
+}
+
+.lista-equipos button {
+    padding: 4px 8px;
+    background: #ef4444;
+    font-size: 0.75rem;
+}
+
+.rf-pizarra-contenedor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+}
+
+#pizarraRfCanvas {
+    background: #ffffff;
+    border: 2px solid #0f172a;
+    border-radius: 8px;
+    cursor: crosshair;
+    width: 480px !important;
+    height: 680px !important;
+    max-height: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.leyenda-calor {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.barra-gradiente {
+    flex: 1;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #ef4444 0%, #f59e0b 30%, #22c55e 60%, #06b6d4 85%, #3b82f6 100%);
+}
+

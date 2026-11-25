@@ -170,9 +170,116 @@
 
     </section>
 
+    <!-- MAPA DE CALOR RF Y PLANO DE INTERIORES (WI-FI / LORAWAN) -->
+    <section class="contenedor" id="seccionMapaCalor">
+        <h2>🗺️ Mapa de Calor RF y Diseño de Interiores (Wi-Fi / LoRaWAN)</h2>
+        <p style="color: #64748b; margin-bottom: 20px;">
+            Dibuja muros interiores (sticks) en la pizarra vertical, asigna equipos Wi-Fi o LoRaWAN y ajusta sus parámetros de transmisión para simular el radio de cobertura y atenuación.
+        </p>
+
+        <div class="rf-studio-grid">
+            <!-- PANEL DE CONTROL Y ASIGNACIÓN DE EQUIPOS -->
+            <div class="rf-controles">
+                <h3>1. Herramientas de Pizarra</h3>
+                <div class="herramientas-btn">
+                    <button type="button" id="btnModoMuro" class="btn-tool activo">🧱 Dibujar Muro / Stick</button>
+                    <button type="button" id="btnModoEquipo" class="btn-tool">📡 Ubicar Equipo</button>
+                    <button type="button" id="btnLimpiarPizarra" class="btn-tool btn-danger">🗑 Limpiar Plano</button>
+                </div>
+
+                <div class="control-grupo">
+                    <label>Material del Muro (Atenuación):</label>
+                    <select id="materialMuro">
+                        <option value="3">Tabique / Drywall (-3 dB)</option>
+                        <option value="6">Vidrio / Madera (-6 dB)</option>
+                        <option value="12" selected>Ladrillo / Concreto (-12 dB)</option>
+                        <option value="20">Hormigón Armado / Metal (-20 dB)</option>
+                    </select>
+                </div>
+
+                <hr style="margin: 15px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+                <h3>2. Asignación y Parámetros del Equipo</h3>
+                <div class="control-grupo">
+                    <label>Nombre del Equipo:</label>
+                    <input type="text" id="eqNombre" placeholder="Ej: GW-LoRa-Norte o AP-Lab01" value="AP-LoRa-01">
+                </div>
+
+                <div class="control-grupo">
+                    <label>Tipo de Equipo y Tecnología:</label>
+                    <select id="eqTipo">
+                        <option value="wifi24">Access Point Wi-Fi (2.4 GHz)</option>
+                        <option value="wifi5">Access Point Wi-Fi (5 GHz)</option>
+                        <option value="loragw" selected>Gateway LoRaWAN (AU915 MHz)</option>
+                        <option value="loranode">Nodo / Sensor LoRaWAN (915 MHz)</option>
+                    </select>
+                </div>
+
+                <!-- POTENCIA TX -->
+                <div class="control-grupo">
+                    <label>Potencia de Transmisión TX (0 a 30 dBm):</label>
+                    <div class="slider-par">
+                        <input type="range" id="eqTxRange" min="0" max="30" step="1" value="20">
+                        <input type="number" id="eqTxNum" min="0" max="30" value="20">
+                    </div>
+                </div>
+
+                <!-- GANANCIA ANTENA -->
+                <div class="control-grupo">
+                    <label>Ganancia de Antena (0 a 15 dBi):</label>
+                    <div class="slider-par">
+                        <input type="range" id="eqGainRange" min="0" max="15" step="0.5" value="5">
+                        <input type="number" id="eqGainNum" min="0" max="15" step="0.5" value="5">
+                    </div>
+                </div>
+
+                <!-- SPREADING FACTOR / FACTOR DE SENSIBILIDAD -->
+                <div class="control-grupo">
+                    <label>Spreading Factor LoRa / Modulación (SF7 - SF12):</label>
+                    <div class="slider-par">
+                        <input type="range" id="eqSfRange" min="7" max="12" step="1" value="10">
+                        <input type="number" id="eqSfNum" min="7" max="12" value="10">
+                    </div>
+                </div>
+
+                <!-- ESCALA DEL PLANO -->
+                <div class="control-grupo">
+                    <label>Escala de Pizarra (Metros de alto: 20m a 500m):</label>
+                    <div class="slider-par">
+                        <input type="range" id="escalaRange" min="20" max="500" step="10" value="100">
+                        <input type="number" id="escalaNum" min="20" max="500" step="10" value="100">
+                    </div>
+                </div>
+
+                <div id="resumenEquipo" class="diagnostico-mini">
+                    EIRP Calculado: <strong>25.0 dBm</strong> | Sensibilidad Umbral: <strong>-132 dBm</strong>
+                </div>
+
+                <h3>3. Equipos Desplegados</h3>
+                <ul id="listaEquiposPlano" class="lista-equipos"></ul>
+            </div>
+
+            <!-- PIZARRA EN BLANCO VERTICAL + MAPA DE CALOR -->
+            <div class="rf-pizarra-contenedor">
+                <div class="leyenda-calor">
+                    <span>Señal Óptima (-30 dBm)</span>
+                    <div class="barra-gradiente"></div>
+                    <span>Límite LoRa (-130 dBm)</span>
+                </div>
+                <canvas id="pizarraRfCanvas" width="480" height="680"></canvas>
+                <small style="color:#64748b; display:block; margin-top:8px; text-align:center;">
+                    Haz clic y arrastra para trazar muros (sticks) o selecciona "Ubicar Equipo" y haz clic en la pizarra.
+                </small>
+            </div>
+        </div>
+    </section>
+
+
+
 </main>
 
 <script src="script.js"></script>
 
 </body>
 </html>
+
