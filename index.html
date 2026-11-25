@@ -1,285 +1,246 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Wolf RF Survey</title>
-
+    <title>Wolf RF Survey — Plataforma de Estudio Wi-Fi</title>
     <link rel="stylesheet" href="style.css">
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
 <header>
-    <h1>WOLF RF SURVEY</h1>
-    <p>Sistema de Evaluación y Cobertura Wi‑Fi</p>
+    <div>
+        <h1>WOLF RF SURVEY</h1>
+        <p>Sistema de Evaluación, Cobertura y Diagnóstico Wi‑Fi — Wolf-Industries</p>
+    </div>
+    <div class="header-actions">
+        <select id="filtroEscenarioGlobal">
+            <option value="todos">Ver: Todos los escenarios</option>
+            <option value="antes">Ver: Solo ANTES</option>
+            <option value="despues">Ver: Solo DESPUÉS</option>
+        </select>
+        <button id="btnExportarCsv" class="btn-secundario">📥 Exportar CSV</button>
+        <label class="btn-file">
+            📂 Importar CSV
+            <input type="file" id="inputImportarCsv" accept=".csv" hidden>
+        </label>
+    </div>
 </header>
 
 <main>
-
     <!-- DASHBOARD -->
-
     <section class="dashboard">
-
         <div class="card">
             <h3>📊 Total Mediciones</h3>
             <span id="totalMediciones">0</span>
         </div>
-
         <div class="card">
             <h3>📶 RSSI Promedio</h3>
-            <span id="promedioRssi">0</span>
+            <span id="promedioRssi">0 dBm</span>
         </div>
-
+        <div class="card">
+            <h3>⏱ Latencia Promedio</h3>
+            <span id="promedioLatencia">0 ms</span>
+        </div>
         <div class="card">
             <h3>⚠ Puntos Críticos</h3>
-            <span id="puntosCriticos">0</span>
+            <span id="puntosCriticos" class="texto-peligro">0</span>
         </div>
-
         <div class="card">
             <h3>✅ Estado General</h3>
             <span id="estadoGeneral">Sin datos</span>
         </div>
-
     </section>
 
-    <!-- FORMULARIO -->
-
+    <!-- MAPA DE CALOR + DETECCIÓN AUTOMÁTICA DE MUROS + BUSCADOR -->
     <section class="contenedor">
+        <div class="section-header">
+            <div>
+                <h2>🗺️ Mapa de Calor RF y Plano de Cobertura</h2>
+                <p class="subtitulo">Haz clic en el plano para mover el Router/AP y ver cómo los muros atenúan la señal en tiempo real.</p>
+            </div>
+            <div class="buscador-box">
+                <input type="text" id="buscadorMapa" placeholder="🔍 Buscar punto en mapa (ej: P03, Cocina, 5 GHz)...">
+                <button type="button" id="btnLimpiarBusquedaMapa" class="btn-neutro">✕</button>
+            </div>
+        </div>
 
-        <h2>Nueva Medición</h2>
+        <div class="mapa-layout">
+            <!-- Panel de controles del mapa -->
+            <div class="mapa-controles">
+                <div class="control-grupo">
+                    <label><strong>1. Plano / Detección de Muros</strong></label>
+                    <label class="btn-primario btn-full">
+                        🖼️ Subir Imagen de Plano
+                        <input type="file" id="inputPlanoImg" accept="image/*" hidden>
+                    </label>
+                    <button type="button" id="btnPlanoEjemplo" class="btn-neutro btn-full">🏠 Restaurar Plano Casa Ejemplo</button>
+                </div>
+
+                <div class="control-grupo">
+                    <label for="umbralMuros">Sensibilidad detección de muros: <strong id="valUmbral">130</strong></label>
+                    <input type="range" id="umbralMuros" min="40" max="230" value="130">
+                </div>
+
+                <div class="control-grupo">
+                    <label for="materialMuro"><strong>2. Material / Atenuación por Muro</strong></label>
+                    <select id="materialMuro">
+                        <option value="4">Tabique / Drywall (-4 dB)</option>
+                        <option value="10" selected>Ladrillo / Interior (-10 dB)</option>
+                        <option value="16">Concreto Armado (-16 dB)</option>
+                        <option value="3">Vidrio / Puerta (-3 dB)</option>
+                    </select>
+                </div>
+
+                <div class="control-grupo">
+                    <label for="potenciaTx">Potencia TX Router: <strong id="valTx">20 dBm</strong></label>
+                    <input type="range" id="potenciaTx" min="10" max="30" value="20">
+                </div>
+
+                <div class="control-grupo">
+                    <label><strong>3. Modo de Clic en el Plano</strong></label>
+                    <div class="modo-btns">
+                        <button type="button" id="btnModoRouter" class="btn-activo">📡 Mover Router</button>
+                        <button type="button" id="btnModoMuro" class="btn-neutro">🧱 Dibujar Muro</button>
+                        <button type="button" id="btnModoBorrarMuro" class="btn-neutro">🧹 Borrar Muro</button>
+                    </div>
+                </div>
+
+                <div class="leyenda-rf">
+                    <strong>Leyenda de Cobertura RF</strong>
+                    <div class="barra-gradiente"></div>
+                    <div class="leyenda-labels">
+                        <span>-35 dBm (Óptima)</span>
+                        <span>-67 dBm (Media)</span>
+                        <span>-85 dBm (Débil)</span>
+                    </div>
+                    <small>Los muros oscuros bloquean y restan dB por raycasting.</small>
+                </div>
+            </div>
+
+            <!-- Lienzo del plano -->
+            <div class="canvas-wrapper">
+                <div class="guia-mapa" id="estadoMapaTexto">
+                    💡 Haz clic en cualquier habitación para ubicar el Router o escribe arriba para localizar un punto medido.
+                </div>
+                <canvas id="planoCanvas" width="760" height="480"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- FORMULARIO DE CAPTURA -->
+    <section class="contenedor">
+        <h2>➕ Registrar Nueva Medición</h2>
 
         <form id="medicionForm">
-
-            <input type="text" id="punto" placeholder="Punto" required>
-
-            <select id="zona">
-                <option>Oficina</option>
-                <option>Bodega</option>
-                <option>Recepción</option>
-                <option>Producción</option>
-                <option>Laboratorio</option>
-                <option>Otro</option>
+            <select id="escenario">
+                <option value="antes">Escenario ANTES</option>
+                <option value="despues">Escenario DESPUÉS</option>
             </select>
 
-            <input type="text" id="responsable" placeholder="Responsable" required>
+            <input type="text" id="punto" placeholder="ID Punto (ej: P01)" required>
 
-            <input type="number"
-                id="rssi"
-                placeholder="RSSI"
-                min="-100"
-                max="-30"
-                required>
+            <div class="coordenadas">
+                <input type="number" id="posX" placeholder="X (1-5)" min="1" max="5" value="1" required>
+                <input type="number" id="posY" placeholder="Y (1-5)" min="1" max="5" value="1" required>
+            </div>
 
-            <input type="number"
-                id="snr"
-                placeholder="SNR"
-                min="0"
-                max="60">
+            <select id="zona">
+                <option>Living / Router</option>
+                <option>Comedor</option>
+                <option>Cocina</option>
+                <option>Pasillo Central</option>
+                <option>Dormitorio Principal</option>
+                <option>Dormitorio 2</option>
+                <option>Patio / Exterior</option>
+            </select>
 
-            <input type="number"
-                id="canal"
-                placeholder="Canal">
+            <input type="text" id="responsable" placeholder="Responsable" value="Técnico RF" required>
+
+            <input type="number" id="rssi" placeholder="RSSI (dBm)" min="-100" max="-25" required>
+            <input type="number" id="snr" placeholder="SNR (dB)" min="0" max="60" value="30">
+            <input type="number" id="canal" placeholder="Canal (ej: 6, 36)" value="36">
 
             <select id="banda">
-                <option>2.4 GHz</option>
                 <option>5 GHz</option>
+                <option>2.4 GHz</option>
                 <option>6 GHz</option>
             </select>
 
-            <input type="number"
-                id="latencia"
-                placeholder="Latencia (ms)">
+            <input type="number" id="latencia" placeholder="Latencia (ms)" value="15">
+            <input type="number" id="throughput" placeholder="Throughput (Mbps)" value="180">
 
             <select id="dispositivo">
                 <option>Notebook</option>
-                <option>Samsung</option>
-                <option>Xiaomi</option>
+                <option>Smartphone Android</option>
                 <option>iPhone</option>
                 <option>Tablet</option>
-                <option>Otro</option>
             </select>
 
-            <textarea
-                id="observaciones"
-                placeholder="Observaciones"></textarea>
+            <textarea id="observaciones" placeholder="Observaciones técnicas o notas de entorno..."></textarea>
 
-            <button type="submit">
-                Guardar Medición
-            </button>
-
+            <div class="acciones-form">
+                <button type="submit" class="btn-primario">💾 Guardar Medición</button>
+                <button type="button" id="btnCapturarAuto" class="btn-secundario">⚡ Capturar en Vivo (PC / Simulada)</button>
+                <button type="button" id="btnCargarDemo" class="btn-neutro">🔄 Cargar 10 Puntos Demo</button>
+                <button type="button" id="btnLimpiar" class="btn-peligro">🗑 Borrar Todo</button>
+            </div>
         </form>
-        <button id="btnLimpiar">
-    🗑 Borrar todas las mediciones
-</button>
-
     </section>
 
-    <!-- DIAGNOSTICO -->
-
+    <!-- DIAGNÓSTICO LÓGICO WOLF -->
     <section class="contenedor">
+        <h2>🧠 Diagnóstico Automático y Reglas Lógicas (WOLF)</h2>
+        <div id="diagnostico">Aún no existen mediciones registradas.</div>
+    </section>
 
-        <h2>Diagnóstico</h2>
-
-        <div id="diagnostico">
-            Aún no existen mediciones registradas.
+    <!-- GRÁFICOS COMPARATIVOS -->
+    <section class="graficos-grid">
+        <div class="contenedor">
+            <h2>📈 Comparativa RSSI por Punto (Antes vs Después)</h2>
+            <canvas id="rssiChart"></canvas>
         </div>
-
-    </section>
-
-    <!-- TABLA -->
-
-    <section class="contenedor">
-
-        <h2>Mediciones Registradas</h2>
-
-        <table>
-
-            <thead>
-                <tr>
-    <th>Acciones</th>
-    <th>Fecha</th>
-    <th>Punto</th>
-    <th>Zona</th>
-    <th>Responsable</th>
-    <th>RSSI</th>
-    <th>Observaciones</th>
-    <th>Estado</th>
-</tr>
-            </thead>
-
-            <tbody id="tablaMediciones">
-
-            </tbody>
-
-        </table>
-
-    </section>
-
-    <!-- GRAFICO -->
-
-    <section class="contenedor">
-
-        <h2>Gráfico RSSI</h2>
-
-        <canvas id="rssiChart"></canvas>
-
-    </section>
-
-    <!-- MAPA DE CALOR RF Y PLANO DE INTERIORES (WI-FI / LORAWAN) -->
-    <section class="contenedor" id="seccionMapaCalor">
-        <h2>🗺️ Mapa de Calor RF y Diseño de Interiores (Wi-Fi / LoRaWAN)</h2>
-        <p style="color: #64748b; margin-bottom: 20px;">
-            Dibuja muros interiores (sticks) en la pizarra vertical, asigna equipos Wi-Fi o LoRaWAN y ajusta sus parámetros de transmisión para simular el radio de cobertura y atenuación.
-        </p>
-
-        <div class="rf-studio-grid">
-            <!-- PANEL DE CONTROL Y ASIGNACIÓN DE EQUIPOS -->
-            <div class="rf-controles">
-                <h3>1. Herramientas de Pizarra</h3>
-                <div class="herramientas-btn">
-                    <button type="button" id="btnModoMuro" class="btn-tool activo">🧱 Dibujar Muro / Stick</button>
-                    <button type="button" id="btnModoEquipo" class="btn-tool">📡 Ubicar Equipo</button>
-                    <button type="button" id="btnLimpiarPizarra" class="btn-tool btn-danger">🗑 Limpiar Plano</button>
-                </div>
-
-                <div class="control-grupo">
-                    <label>Material del Muro (Atenuación):</label>
-                    <select id="materialMuro">
-                        <option value="3">Tabique / Drywall (-3 dB)</option>
-                        <option value="6">Vidrio / Madera (-6 dB)</option>
-                        <option value="12" selected>Ladrillo / Concreto (-12 dB)</option>
-                        <option value="20">Hormigón Armado / Metal (-20 dB)</option>
-                    </select>
-                </div>
-
-                <hr style="margin: 15px 0; border: 0; border-top: 1px solid #e2e8f0;">
-
-                <h3>2. Asignación y Parámetros del Equipo</h3>
-                <div class="control-grupo">
-                    <label>Nombre del Equipo:</label>
-                    <input type="text" id="eqNombre" placeholder="Ej: GW-LoRa-Norte o AP-Lab01" value="AP-LoRa-01">
-                </div>
-
-                <div class="control-grupo">
-                    <label>Tipo de Equipo y Tecnología:</label>
-                    <select id="eqTipo">
-                        <option value="wifi24">Access Point Wi-Fi (2.4 GHz)</option>
-                        <option value="wifi5">Access Point Wi-Fi (5 GHz)</option>
-                        <option value="loragw" selected>Gateway LoRaWAN (AU915 MHz)</option>
-                        <option value="loranode">Nodo / Sensor LoRaWAN (915 MHz)</option>
-                    </select>
-                </div>
-
-                <!-- POTENCIA TX -->
-                <div class="control-grupo">
-                    <label>Potencia de Transmisión TX (0 a 30 dBm):</label>
-                    <div class="slider-par">
-                        <input type="range" id="eqTxRange" min="0" max="30" step="1" value="20">
-                        <input type="number" id="eqTxNum" min="0" max="30" value="20">
-                    </div>
-                </div>
-
-                <!-- GANANCIA ANTENA -->
-                <div class="control-grupo">
-                    <label>Ganancia de Antena (0 a 15 dBi):</label>
-                    <div class="slider-par">
-                        <input type="range" id="eqGainRange" min="0" max="15" step="0.5" value="5">
-                        <input type="number" id="eqGainNum" min="0" max="15" step="0.5" value="5">
-                    </div>
-                </div>
-
-                <!-- SPREADING FACTOR / FACTOR DE SENSIBILIDAD -->
-                <div class="control-grupo">
-                    <label>Spreading Factor LoRa / Modulación (SF7 - SF12):</label>
-                    <div class="slider-par">
-                        <input type="range" id="eqSfRange" min="7" max="12" step="1" value="10">
-                        <input type="number" id="eqSfNum" min="7" max="12" value="10">
-                    </div>
-                </div>
-
-                <!-- ESCALA DEL PLANO -->
-                <div class="control-grupo">
-                    <label>Escala de Pizarra (Metros de alto: 20m a 500m):</label>
-                    <div class="slider-par">
-                        <input type="range" id="escalaRange" min="20" max="500" step="10" value="100">
-                        <input type="number" id="escalaNum" min="20" max="500" step="10" value="100">
-                    </div>
-                </div>
-
-                <div id="resumenEquipo" class="diagnostico-mini">
-                    EIRP Calculado: <strong>25.0 dBm</strong> | Sensibilidad Umbral: <strong>-132 dBm</strong>
-                </div>
-
-                <h3>3. Equipos Desplegados</h3>
-                <ul id="listaEquiposPlano" class="lista-equipos"></ul>
-            </div>
-
-            <!-- PIZARRA EN BLANCO VERTICAL + MAPA DE CALOR -->
-            <div class="rf-pizarra-contenedor">
-                <div class="leyenda-calor">
-                    <span>Señal Óptima (-30 dBm)</span>
-                    <div class="barra-gradiente"></div>
-                    <span>Límite LoRa (-130 dBm)</span>
-                </div>
-                <canvas id="pizarraRfCanvas" width="480" height="680"></canvas>
-                <small style="color:#64748b; display:block; margin-top:8px; text-align:center;">
-                    Haz clic y arrastra para trazar muros (sticks) o selecciona "Ubicar Equipo" y haz clic en la pizarra.
-                </small>
-            </div>
+        <div class="contenedor">
+            <h2>📡 Distribución y Uso de Canales Wi‑Fi</h2>
+            <canvas id="canalesChart"></canvas>
         </div>
     </section>
 
+    <!-- TABLA CON BUSCADOR SINCRONIZADO -->
+    <section class="contenedor">
+        <div class="section-header">
+            <h2>📋 Mediciones Registradas</h2>
+            <div class="buscador-box">
+                <input type="text" id="buscadorTabla" placeholder="🔍 Filtrar tabla por punto, zona, canal, estado...">
+                <button type="button" id="btnLimpiarBusquedaTabla" class="btn-neutro">✕</button>
+            </div>
+        </div>
 
-
+        <div class="tabla-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Escenario</th>
+                        <th>Punto</th>
+                        <th>Pos (X,Y)</th>
+                        <th>Zona</th>
+                        <th>Banda / Canal</th>
+                        <th>RSSI</th>
+                        <th>SNR</th>
+                        <th>Latencia</th>
+                        <th>Mbps</th>
+                        <th>Estado</th>
+                        <th>Diagnóstico / Notas</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaMediciones"></tbody>
+            </table>
+        </div>
+    </section>
 </main>
 
 <script src="script.js"></script>
-
 </body>
 </html>
-
